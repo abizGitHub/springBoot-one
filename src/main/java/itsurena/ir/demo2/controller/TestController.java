@@ -1,79 +1,77 @@
 package itsurena.ir.demo2.controller;
 
-
-import com.fasterxml.jackson.annotation.JsonView;
-import itsurena.ir.demo2.exception.UserNotFoundException;
-import itsurena.ir.demo2.model.entity.UserInfo;
-import itsurena.ir.demo2.model.entity.UserInfoView;
+import itsurena.ir.demo2.exception.ApiException;
 import itsurena.ir.demo2.service.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/userInfos")
 public class TestController {
 
     @Autowired
     UserInfoService userInfoService;
 
-
-    @PostMapping("/createUser")
-    public UserInfo createUser(@JsonView(UserInfoView.CreateScope.class) @Validated @RequestBody UserInfo userInfo) {
-        userInfoService.saveUser(userInfo);
-        return userInfo;
+    @PutMapping
+    public ResponseEntity createUser(@RequestBody UserInfoDto userInfoDto) throws ApiException {
+        UserInfoDto createdUser = userInfoService.createUser(userInfoDto);
+        return new ResponseEntity(createdUser, HttpStatus.CREATED);
     }
 
-    @GetMapping("/deleteUserByUserName/{username}")
-    public ResponseEntity deleteUserByUserName(@PathVariable String username) throws UserNotFoundException {
+    @DeleteMapping("/deleteByUserName/{username}")
+    public ResponseEntity deleteByUserName(@PathVariable String username) throws ApiException {
         userInfoService.deleteByUserName(username);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("delete done!");
     }
 
-    @GetMapping("/deleteUserById/{id}")
-    public ResponseEntity deleteUserById(@PathVariable Long id) throws UserNotFoundException {
+    @DeleteMapping("/deleteById/{id}")
+    public ResponseEntity deleteById(@PathVariable Long id) throws ApiException {
         userInfoService.deleteById(id);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("delete done!");
     }
 
-
-    @PostMapping("/editFirstAndLastName")
-    public ResponseEntity editFirstAndLastName(@JsonView(UserInfoView.UpdateScope.class) @RequestBody UserInfo userInfo) throws UserNotFoundException {
-        userInfoService.editFirstAndLastName(userInfo);
+    @PatchMapping("/modifyFirstAndLastName")
+    public ResponseEntity modifyFirstAndLastName(@RequestBody UserInfoDto userInfoDto) throws ApiException {
+        userInfoService.modifyFirstAndLastName(userInfoDto.getId(), userInfoDto.getFirstName(), userInfoDto.getLastName());
         return ResponseEntity.status(HttpStatus.OK)
                 .body("update done!");
     }
 
 
-    @PostMapping("/editPassword")
-    public ResponseEntity editPassword(@JsonView(UserInfoView.UpdateScope.class) @RequestBody UserInfo userInfo) throws UserNotFoundException {
-        userInfoService.editPassword(userInfo);
+    @PatchMapping("/modifyPassword")
+    public ResponseEntity modifyPassword(@RequestBody UserInfoDto userInfoDto) throws ApiException {
+        userInfoService.modifyPassword(userInfoDto.getId(), userInfoDto.getPassword(), userInfoDto.getNewPassword());
         return ResponseEntity.status(HttpStatus.OK)
                 .body("update done!");
     }
 
-    @GetMapping("/getUserByUserName/{username}")
-    public UserInfo getUserByUserName(@PathVariable String username) throws UserNotFoundException {
-        return userInfoService.loadUserByUserName(username);
+    @GetMapping("/findByUserName/{username}")
+    public ResponseEntity findByUserName(@PathVariable String username) throws ApiException {
+        UserInfoDto userInfoDto = userInfoService.findByUserName(username);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(userInfoDto);
     }
 
-
-    @GetMapping("/getUserById/{id}")
-    public UserInfo getUserById(@PathVariable Long id) throws UserNotFoundException {
-        return userInfoService.loadUserById(id);
+    @GetMapping("/findById/{id}")
+    public ResponseEntity findById(@PathVariable Long id) throws ApiException {
+        UserInfoDto userInfoDto = userInfoService.findById(id);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(userInfoDto);
     }
 
-    @GetMapping("/loadAllUsers")
-    public List<UserInfo> loadAllUsers() {
-        return userInfoService.loadAllUsers();
+    @GetMapping
+    public ResponseEntity findAll() throws ApiException {
+        List<UserInfoDto> list = userInfoService.findAll();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(list);
     }
 
 }

@@ -1,34 +1,23 @@
-package itsurena.ir.demo2.model.entity;
+package itsurena.ir.demo2.controller;
 
-
-import javax.persistence.*;
 import java.util.Date;
 
+public class UserInfoDto {
 
-@Entity(name = "UserInfo")
-@Table(name = "USER_INFO")
-public class UserInfo {
-
-    @Id
-    @GeneratedValue
     private Long id;
 
-    @Column(columnDefinition = "NVARCHAR2(30)", name = "USERNAME")
     private String userName;
 
-    @Column(columnDefinition = "NVARCHAR2(30)")
     private String password;
 
-    @Column(columnDefinition = "NVARCHAR2(30)", name = "FIRST_NAME")
+    private String newPassword;
+
     private String firstName;
 
-    @Column(columnDefinition = "NVARCHAR2(30)", name = "LAST_NAME")
     private String lastName;
 
-    @Column(columnDefinition = "Date", name = "CREATE_DATE")
     private Date createDate;
 
-    @Column(columnDefinition = "Date", name = "MODIFIED_DATE")
     private Date modifiedDate;
 
     public Long getId() {
@@ -87,4 +76,11 @@ public class UserInfo {
         this.modifiedDate = modifiedDate;
     }
 
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
+    }
 }

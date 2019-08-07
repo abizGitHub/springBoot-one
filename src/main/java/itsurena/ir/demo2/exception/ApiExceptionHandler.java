@@ -1,80 +1,46 @@
 package itsurena.ir.demo2.exception;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidationException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 @ControllerAdvice
 public class ApiExceptionHandler {
 
-
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ApiException.class)
     @ResponseBody
-    public ApiError notNullConsErrors(Exception ex) {
+    public ResponseEntity usernameUniqueConsError(ApiException ex) {
+        if (ex.type.equals(ApiExceptionType.USER_NAME_ALREADY_EXIST))
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
 
-        System.out.println(ex.getMessage());
+        if (ex.type.equals(ApiExceptionType.USER_NOT_FOUND))
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
 
-        /*Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
-        for (ConstraintViolation<?> violation : violations) {
-            System.out.println(violation);
-        }
-        */
-        return new ApiError(601, "unknown unique constraint");
+        boolean notModified = ex.type.equals(ApiExceptionType.PASSWORD_MIN_LENGTH)
+                || ex.type.equals(ApiExceptionType.PASSWORD_MAX_LENGTH)
+                || ex.type.equals(ApiExceptionType.USER_NAME_MIN_LENGTH)
+                || ex.type.equals(ApiExceptionType.USER_NAME_MAX_LENGTH)
+                || ex.type.equals(ApiExceptionType.FIRST_NAME_MIN_LENGTH)
+                || ex.type.equals(ApiExceptionType.FIRST_NAME_MAX_LENGTH)
+                || ex.type.equals(ApiExceptionType.LAST_NAME_MIN_LENGTH)
+                || ex.type.equals(ApiExceptionType.LAST_NAME_MAX_LENGTH)
+                || ex.type.equals(ApiExceptionType.PASSWORD_MUST_NOT_NULL)
+                || ex.type.equals(ApiExceptionType.USER_NAME_MUST_NOT_NULL)
+                || ex.type.equals(ApiExceptionType.FIRST_NAME_MUST_NOT_NULL)
+                || ex.type.equals(ApiExceptionType.LAST_NAME_MUST_NOT_NULL);
+
+        if (notModified)
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(ex.getMessage());
+
+        if (ex.type.equals(ApiExceptionType.PASSWORD_INCORRECT_ERROR))
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+
+        if (ex.type.equals(ApiExceptionType.USERS_LIST_IS_EMPTY))
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public ApiError usernameUniqueConsError(ConstraintViolationException ex) {
-        if (ex.getConstraintName().contains("UQ_USERNAME"))
-            return new ApiError(601, "username already exist");
-        else
-            return new ApiError(601, "unknown unique constraint");
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public ApiError userNotFoundError(UserNotFoundException ex) {
-        return new ApiError(601, ex.getMessage());
-    }
-
-    /*@ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ApiError handleValidationExceptions(
-            MethodArgumentNotValidException ex) {
-        StringBuffer errors = new StringBuffer();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            //String fieldName = ((FieldError) error).getField();
-            errors.append(error.getDefaultMessage());
-            errors.append("\n");
-        });
-        return new ApiError(602, "errors.toString()");
-    }
-*/
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(ValidationException.class)
-    public Map<String, String> handleValidationExceptions(
-            MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return errors;
-    }
 }
