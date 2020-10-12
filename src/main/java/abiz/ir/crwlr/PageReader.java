@@ -31,7 +31,7 @@ public class PageReader implements Callable<List<String>> {
                 links.addAll(l);
             }
         });
-        System.err.println("SCANNED: "+url);
+        System.err.println("SCANNED: " + url);
         return links;
     }
 

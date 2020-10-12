@@ -16,14 +16,14 @@ public class ReadersQueue {
     private int placeIndex = 0;
     private ExecutorService executorService;
 
-
     private final Lock lock = new ReentrantLock();
     private final Condition isFull = lock.newCondition();
 
-    public Future<List<String>> addPage(String url) throws Exception {
+    public Future<List<String>> addPage(String url) {
         lock.lock();
-        while (placeIndex >= readers.length)
-            isFull.wait();
+        while (placeIndex >= readers.length) {
+            isFull.signalAll();
+        }
         readers[placeIndex] = new PageReader(url);
         Future<List<String>> future = executorService.submit(readers[placeIndex]);
         ++placeIndex;
@@ -46,5 +46,13 @@ public class ReadersQueue {
 
     public PageReader[] getReaders() {
         return readers;
+    }
+
+    public Lock getLock() {
+        return lock;
+    }
+
+    public Condition getIsFull() {
+        return isFull;
     }
 }
