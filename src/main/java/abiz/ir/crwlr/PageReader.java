@@ -39,4 +39,9 @@ public class PageReader implements Callable<List<String>> {
         return url;
     }
 
+
+    public static void main(String[] args) {
+
+    }
+
 }

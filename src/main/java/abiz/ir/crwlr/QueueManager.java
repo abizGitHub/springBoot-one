@@ -9,7 +9,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class QueueManager {
 
@@ -19,7 +18,7 @@ public class QueueManager {
     private FutureBox[] boxes;
     private Checker checker;
     private Lock lock;
-    private int ix;
+    private long ix;
     private boolean ignoreRepetitiveUrl;
     public List<String> excludedUrls;
 
@@ -42,14 +41,16 @@ public class QueueManager {
     }
 
     public void start() {
-        addLink4Check(rootUrl);
+        addLink4Check(rootUrl, null);
         new Thread(checker).start();
     }
 
-    public void addLink4Check(String url) {
+    public void addLink4Check(String url, Long parentId) {
+        Logger.log(url, parentId);
         lock.lock();
+        ix++;
         Future<List<String>> future = queue.addPage(url);
-        boxes[ix++] = new FutureBox(url, future, checker);
+        boxes[(int) ix] = new FutureBox(url, future, checker, ix);
         lock.unlock();
     }
 
@@ -96,15 +97,13 @@ public class QueueManager {
         }
 
         public void boxDone(FutureBox box) {
-            List<String> list = box.getList().stream()
-                    .filter(s -> s != box.getRootUrl())
-                    .filter(s -> !s.startsWith(box.getRootUrl()))
-                    .collect(Collectors.toList());
-            if (list != null && !list.isEmpty())
-                list.forEach(s -> {
-                    System.out.println(s);
-                    addLink4Check(s);
-                });
+            Long parentId = box.getParentId();
+            for (String childUrl : box.getList()) {
+                if (excludedUrls.stream().anyMatch(s -> childUrl.startsWith(Logger.extractBaseUrl(s)))) continue;
+                boolean already = LogChecker.isPartlyInLog(Logger.extractBaseUrl(childUrl));
+                if (already) continue;
+                addLink4Check(Logger.extractBaseUrl(childUrl), parentId);
+            }
         }
 
         class UrlFilter implements Predicate<String> {
@@ -139,11 +138,13 @@ public class QueueManager {
         private final Checker checker;
         private final String rootUrl;
         private List<String> list;
+        private final Long parentId;
 
-        public FutureBox(String rootUrl, Future<List<String>> listFuture, Checker checker) {
+        public FutureBox(String rootUrl, Future<List<String>> listFuture, Checker checker, Long parentId) {
             this.listFuture = listFuture;
             this.checker = checker;
             this.rootUrl = rootUrl;
+            this.parentId = parentId;
         }
 
         public boolean isChecked() {
@@ -170,6 +171,10 @@ public class QueueManager {
 
         public String getRootUrl() {
             return rootUrl;
+        }
+
+        public Long getParentId() {
+            return parentId;
         }
     }
 
