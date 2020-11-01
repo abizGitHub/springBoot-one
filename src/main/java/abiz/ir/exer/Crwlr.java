@@ -14,9 +14,10 @@ public class Crwlr {
 
     public static void main(String[] args) throws IOException {
         Crwlr crwlr = new Crwlr();
-        List<String> links = crwlr.getPageLinks("https://www.projectlombok.org/setup/maven");//"http://balatarin.com/");
-        links.forEach(System.out::println);
-        //crwlr.doCrowl("https://stackexchange.com/sites",100);
+        //List<String> links = crwlr.getPageLinks("https://www.projectlombok.org/setup/maven");//"http://balatarin.com/");
+        //links.forEach(System.out::println);
+        crwlr.doCrowl("https://en.ryte.com/wiki/Crawler#cite_note-1",100);
+        crwlr.map.entrySet().stream().forEach(System.out::println);
     }
 
 
@@ -27,7 +28,7 @@ public class Crwlr {
         BufferedReader bufferedReader = new BufferedReader(reader);
         bufferedReader.lines().forEach(s -> {
             List<String> l = TagExtractor.extractLink(s, true);
-            System.out.println(l);
+            //System.out.println(l);
             if (l != null && !l.isEmpty()) {
                 list.addAll(l);
             }
