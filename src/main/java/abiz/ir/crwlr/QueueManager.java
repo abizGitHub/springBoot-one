@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
@@ -20,7 +21,9 @@ public class QueueManager {
     private Lock lock;
     private long ix;
     private boolean ignoreRepetitiveUrl;
+    private boolean ignoreInAnyPartUrl;
     public List<String> excludedUrls;
+    private int retry;
 
     public List<String> getPagesList() {
         return queue.getPagesList();
@@ -46,11 +49,11 @@ public class QueueManager {
     }
 
     public void addLink4Check(String url, Long parentId) {
-        Logger.log(url, parentId);
         lock.lock();
-        ix++;
+        Logger.log(url, parentId, ix);
         Future<List<String>> future = queue.addPage(url);
         boxes[(int) ix] = new FutureBox(url, future, checker, ix);
+        ix++;
         lock.unlock();
     }
 
@@ -59,10 +62,21 @@ public class QueueManager {
         return this;
     }
 
+    public QueueManager ignoreInAnyPartUrl() {
+        ignoreInAnyPartUrl = true;
+        return this;
+    }
+
     public QueueManager ignoreUrl(String url) {
         excludedUrls.add(url);
         return this;
     }
+
+    public QueueManager retry(int retry) {
+        this.retry = retry;
+        return this;
+    }
+
 
     class Checker implements Runnable {
 
@@ -92,17 +106,23 @@ public class QueueManager {
             service.shutdown();
         }
 
-        public void boxExcp(Exception e) {
-
+        public void boxExcp(FutureBox box, Exception e) {
+            Logger.log("ERROR in (" + box.getRootUrl() + ") " + e.getMessage(), box.getParentId(), box.parentId);
+            System.err.println(e);
         }
 
         public void boxDone(FutureBox box) {
             Long parentId = box.getParentId();
             for (String childUrl : box.getList()) {
-                if (excludedUrls.stream().anyMatch(s -> childUrl.startsWith(Logger.extractBaseUrl(s)))) continue;
+                if (ignoreInAnyPartUrl) {
+                    if (excludedUrls.stream().anyMatch(exc -> childUrl.contains(exc))) continue;
+                } else {
+                    if (excludedUrls.stream().anyMatch(exc -> childUrl.startsWith(Logger.extractBaseUrl(exc))))
+                        continue;
+                }
                 boolean already = LogChecker.isPartlyInLog(Logger.extractBaseUrl(childUrl));
                 if (already) continue;
-                addLink4Check(Logger.extractBaseUrl(childUrl), parentId);
+                addLink4Check(childUrl, parentId);
             }
         }
 
@@ -160,7 +180,7 @@ public class QueueManager {
             try {
                 list = listFuture.get();
             } catch (InterruptedException | ExecutionException e) {
-                checker.boxExcp(e);
+                checker.boxExcp(this, e);
             }
             checker.boxDone(this);
         }

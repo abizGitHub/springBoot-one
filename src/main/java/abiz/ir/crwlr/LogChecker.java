@@ -44,10 +44,10 @@ public class LogChecker {
     public static void main(String[] args) {
         String url = "https://www.theguardian.com/international";
         System.out.println(url);
-        System.out.println(Logger.makeLine(url, 11, 875048040));
-        System.out.println(Logger.extractUrl(Logger.makeLine(url, 11, 875048040)));
+        System.out.println(Logger.makeLine(url, 11, 875048040L));
+        System.out.println(Logger.extractUrl(Logger.makeLine(url, 11, 875048040L)));
         for (int i = 0; i < 5000; i++) {
-            Logger.log(url, 555L);
+            Logger.log(url, 555L,0L);
         }
         /*try {
             Thread.sleep(111);

@@ -14,22 +14,21 @@ public class Logger {
     static ExecutorService service;
     static OutputStreamWriter outputStreamWriter;
     static Lock lock;
-    static long id;
     static String addr = "./src/main/java/abiz/ir/crwlr/a";
 
     public static String extractUrl(String line) {
         return line.replaceFirst("[0-9]*\\s*<<<[|]", "").replaceFirst("[|]>>> [0-9]*\\s*", "").trim();
     }
 
-    public static String makeLine(String url, long id, long parentId) {
+    public static String makeLine(String url, long id, Long parentId) {
         return String.format(FORMAT, id, url, parentId);
     }
 
     public static String extractBaseUrl(String url) {
         Matcher matcher = Pattern.compile("http[s]?://[^/]*").matcher(url);
-        if(matcher.find())
+        if (matcher.find())
             return matcher.toMatchResult().group();
-        return null;
+        return url;
     }
 
     static {
@@ -50,25 +49,27 @@ public class Logger {
         }
     }
 
-    static void log(String url, Long parentId) {
-        service.submit(new Writer(url, parentId));
+    static void log(String url, Long parentId, Long id) {
+        service.submit(new Writer(url, parentId, id));
     }
 
     static class Writer implements Runnable {
 
         final String log;
         final Long parentId;
+        final Long id;
 
-        public Writer(String log, Long parentId) {
+        public Writer(String log, Long parentId, Long id) {
             this.log = log;
             this.parentId = parentId;
+            this.id = id;
         }
 
         @Override
         public void run() {
             lock.lock();
             try {
-                outputStreamWriter.write(makeLine(log, id++, parentId) + "\n");
+                outputStreamWriter.write(makeLine(log, id, parentId) + "\n");
                 outputStreamWriter.flush();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -84,11 +85,11 @@ public class Logger {
         Logger.log("https://www.theguardian.com/international/b", 154L);
         Logger.log("https://www.theguardian.com/international/cccd", 0L);
   */
-        String u ="https://support.theguardian.com/support";
+        String u = "https://support.theguardian.com/support";
         //u.indexOf("")
         Matcher matcher = Pattern.compile("http[s]?://[^/]*").matcher(u);
-        if(matcher.find())
-        System.out.println(matcher.toMatchResult().group());
+        if (matcher.find())
+            System.out.println(matcher.toMatchResult().group());
         System.out.println(extractBaseUrl(u));
         System.out.println(extractBaseUrl("https://www.theguardian.com/international/cccd"));
 

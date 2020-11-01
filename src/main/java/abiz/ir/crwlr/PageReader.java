@@ -24,6 +24,8 @@ public class PageReader implements Callable<List<String>> {
     @Override
     public List<String> call() throws Exception {
         urlConnection = new URL(url).openConnection();
+        urlConnection.setRequestProperty("user-agent","Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0");
+        urlConnection.setDoInput(true);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
         bufferedReader.lines().forEach(s -> {
             List<String> l = TagExtractor.extractLink(s, true);
