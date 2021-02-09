@@ -1,10 +1,15 @@
 package abiz.ir.crwlr.some;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -74,7 +79,28 @@ public class Main {
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
-
     }
+
+    private static void timeIr() throws Exception {
+        URLConnection urlConnection = new URL("https://www.time.ir/").openConnection();
+        InputStreamReader reader = new InputStreamReader(urlConnection.getInputStream());
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        String content = bufferedReader.lines().collect(Collectors.joining());
+        String s1 = "";
+        String quote = "";
+        String author = "";
+        Matcher matcher = Pattern.compile("<div class=\"randomQuote\">(.*?)</div>", Pattern.MULTILINE).matcher(content);
+        if (matcher.find())
+            s1 = matcher.group(0).replaceFirst("<div class=\"randomQuote\">", "");
+        matcher = Pattern.compile(">(.*?)<", Pattern.MULTILINE).matcher(s1);
+        if (matcher.find())
+            quote = matcher.group(0).replaceAll(">", "").replaceAll("<", "");
+        matcher = Pattern.compile(">([^>]*?)</a>").matcher(s1);
+        if (matcher.find())
+            author = matcher.group(0).replaceAll("</a>", "").replaceAll(">", "");
+        System.out.println(author + " :");
+        System.out.println(quote);
+    }
+
 
 }
