@@ -1,7 +1,7 @@
 /*
 package abiz.ir.exer;
 
-import com.nicico.sales.service.UnitService;
+import service.UnitService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

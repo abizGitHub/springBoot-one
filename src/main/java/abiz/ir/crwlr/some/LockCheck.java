@@ -22,7 +22,7 @@ public class LockCheck {
 
     public static void main(String[] args) throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(200);
-        com.nicico.sales.LockCheck lockCheck = new com.nicico.sales.LockCheck();
+        LockCheck lockCheck = new LockCheck();
         for (int i = 0; i < 2; i++) {
             executorService.submit(lockCheck.new Check(lockCheck.c1, lockCheck.lock));
             executorService.submit(lockCheck.new Check(lockCheck.c2, lockCheck.lock));

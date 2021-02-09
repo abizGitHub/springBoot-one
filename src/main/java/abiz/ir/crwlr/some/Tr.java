@@ -9,7 +9,7 @@ public class Tr {
 
     public static void main(String[] args) throws InterruptedException {
         Lock lock = new ReentrantLock();
-        com.nicico.sales.Tr tr = new com.nicico.sales.Tr();
+        Tr tr = new Tr();
         ArrayList list = new ArrayList();
         Condition one = lock.newCondition();
         Condition two = lock.newCondition();
