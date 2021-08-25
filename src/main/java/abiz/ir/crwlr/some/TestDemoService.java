@@ -4,7 +4,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.security.access.AccessDeniedException;
 
 //import org.springframework.security.core.authority.GrantedAuthorityImpl;
 //import org.springframework.security.core.userdetails.memory.InMemoryDaoImpl;
@@ -43,7 +42,7 @@ public class TestDemoService {
     /**
      * Test the valid user with INVALID role
      * */
-    @Test (expected = AccessDeniedException.class)
+   // @Test (expected = AccessDeniedException.class)
     public void testInvalidRole()
     {
       /*  UserDetails userDetails = userDetailsService.loadUserByUsername ("lokesh");
@@ -58,7 +57,7 @@ public class TestDemoService {
     /**
      * Test the INVALID user
      * */
-    @Test (expected = AccessDeniedException.class)
+    //@Test (expected = AccessDeniedException.class)
     public void testInvalidUser()
     {
         /*UserDetails userDetails = userDetailsService.loadUserByUsername ("admin");

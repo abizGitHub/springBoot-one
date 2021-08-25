@@ -1,4 +1,5 @@
 package abiz.ir.crwlr.some;
+/*
 
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.kernel.colors.DeviceCmyk;
@@ -13,6 +14,7 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.borders.RidgeBorder;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.property.TextAlignment;
+*/
 
 import java.awt.*;
 import java.io.*;
@@ -53,6 +55,7 @@ public class Tst {
         bo.close();
 */
     }
+/*
 
     public void manipulatePdf(String htmlSource, String pdfDest) throws IOException {
         PdfWriter writer = new PdfWriter(pdfDest);
@@ -147,5 +150,6 @@ public class Tst {
             canvas.close();
         }
     }
+*/
 
 }

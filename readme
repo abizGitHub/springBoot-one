@@ -1,0 +1,2 @@
+javac ShomareBime.java
+jar -cfvm ShomareBime.jar MANIFEST.MF ShomareBime.class
